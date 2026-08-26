@@ -40,4 +40,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('kategoris', KategoriController::class)->except(['show']);
         Route::resource('raks', RakController::class)->except(['show']);
     });
+
+    Route::middleware(['auth', 'role:siswa'])->group(function () {
+    Route::get('katalog-buku', [BukuController::class, 'catalog'])
+        ->name('katalog-buku.index');
+});
 });
