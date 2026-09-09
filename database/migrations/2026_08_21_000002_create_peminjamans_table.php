@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('peminjamans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('anggota_id')->constrained('anggotas');
+            $table->string('nis_nip');
             $table->foreignId('buku_id')->constrained('bukus');
             $table->date('tanggal_pinjam');
             $table->date('batas_pengembalian');
@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('status')->default('dipinjam');
             $table->unsignedInteger('denda')->default(0);
             $table->timestamps();
+
+            $table->foreign('nis_nip')->references('nis_nip')->on('anggotas')->onDelete('cascade');
 
             $table->index(['status', 'batas_pengembalian']);
         });

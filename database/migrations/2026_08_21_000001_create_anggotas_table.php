@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('anggotas', function (Blueprint $table) {
             $table->id();
             $table->string('nomor_anggota')->unique();
-            $table->string('nama');
-            $table->string('jenis_anggota');
             $table->string('nis_nip')->nullable()->unique();
+            $table->string('nama');
+            $table->string('jenis_anggota')->nullable()->default('siswa');
             $table->string('kelas')->nullable();
             $table->string('email')->nullable();
             $table->boolean('aktif')->default(true);

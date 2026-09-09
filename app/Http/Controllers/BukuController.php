@@ -31,6 +31,24 @@ class BukuController extends Controller
         return view('bukus.index', compact('bukus', 'search'));
     }
 
+    public function catalog(Request $request)
+    {
+        $search = $request->string('search')->trim()->toString();
+        $bukus = Buku::with(['kategori', 'rak'])
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('judul', 'like', "%{$search}%")
+                        ->orWhere('penulis', 'like', "%{$search}%")
+                        ->orWhere('kode_buku', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('bukus.catalog', compact('bukus', 'search'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */

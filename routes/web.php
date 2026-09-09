@@ -6,8 +6,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RakController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -18,6 +20,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/', fn () => redirect()->route('dashboard'));
+    Route::get('profil', ProfileController::class)->name('profil');
 
     Route::middleware('role:admin,petugas,kepala_sekolah')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
@@ -39,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('kategoris', KategoriController::class)->except(['show']);
         Route::resource('raks', RakController::class)->except(['show']);
+        Route::get('setting', SettingController::class)->name('setting');
     });
 
     Route::middleware(['auth', 'role:siswa'])->group(function () {

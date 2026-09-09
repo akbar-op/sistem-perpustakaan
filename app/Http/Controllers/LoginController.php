@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,10 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
+
+        if (($user = $request->user()) instanceof User && $user->isStudent()) {
+            return redirect()->route('katalog-buku.index');
+        }
 
         return redirect()->intended(route('dashboard'));
     }

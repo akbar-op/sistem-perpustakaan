@@ -12,7 +12,12 @@ class ReportController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('reports.index', ['canViewBookReport' => ! $request->user()->isPrincipal()]);
+        return view('reports.index', [
+            'canViewBookReport' => ! $request->user()->isPrincipal(),
+            'totalBuku' => Buku::count(),
+            'totalPeminjaman' => Peminjaman::count(),
+            'totalDenda' => Peminjaman::sum('denda'),
+        ]);
     }
 
     public function print(Request $request, string $type): View

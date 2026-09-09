@@ -8,3 +8,28 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+html.dark body {
+    background-color: #111827;
+    color: #e5e7eb;
+}
+
+html.dark main,
+html.dark main [class*="bg-white"] {
+    background-color: #1f2937;
+}
+
+html.dark main [class*="text-[#"] {
+    color: #e5e7eb;
+}
+
+html.dark main [class*="border-[#"] {
+    border-color: #475569;
+}
+
+html.dark main input,
+html.dark main textarea,
+html.dark main select {
+    background-color: #111827;
+    color: #e5e7eb;
+}

@@ -3,14 +3,19 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk | LibraMS</title>
+    <title>Masuk | PerpusKu</title>
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-full bg-[#f4f7fc] text-[#14213d]">
     <main class="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)]">
         <section class="relative flex min-h-[420px] flex-col overflow-hidden bg-[#4161e8] px-7 py-8 text-white sm:px-12 lg:min-h-screen lg:px-16 lg:py-12">
-            <div class="relative z-10 flex items-center gap-3 text-xl font-bold tracking-tight"><span class="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-sm font-black">LM</span>LibraMS</div>
+            <div class="relative z-10 flex items-center gap-3 text-xl font-bold tracking-tight"><span class="grid h-9 w-9 place-items-center overflow-hidden rounded bg-white">
+                    <img
+                        src="{{ asset('image/ebook.png') }}"
+                        alt="Logo PerpusKu"
+                        class="h-full w-full object-contain p-1">
+                </span>PerpusKu</div>
             <div class="relative z-10 my-auto max-w-lg py-16">
                 <p class="mb-5 inline-flex rounded-full bg-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">Administrator Portal</p>
                 <h1 class="max-w-md text-4xl font-bold leading-tight tracking-tight sm:text-5xl">Kelola perpustakaan dengan percaya diri.</h1>

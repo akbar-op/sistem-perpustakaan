@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Buku extends Model
@@ -30,9 +31,9 @@ class Buku extends Model
         ];
     }
 
-    public function peminjamans(): HasMany
+    public function peminjamans(): BelongsToMany
     {
-        return $this->hasMany(Peminjaman::class);
+        return $this->belongsToMany(Peminjaman::class);
     }
 
     public function kategori(): BelongsTo

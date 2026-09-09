@@ -10,7 +10,7 @@ class Anggota extends Model
     protected $fillable = [
         'nomor_anggota',
         'nama',
-        'role',
+        'jenis_anggota',
         'nis_nip',
         'kelas',
         'email',
@@ -24,9 +24,8 @@ class Anggota extends Model
         ];
     }
 
-
     public function peminjamans(): HasMany
     {
-        return $this->hasMany(Peminjaman::class);
+        return $this->hasMany(Peminjaman::class, 'nis_nip', 'nis_nip');
     }
 }

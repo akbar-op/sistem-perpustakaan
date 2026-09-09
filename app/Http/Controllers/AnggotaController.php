@@ -12,6 +12,7 @@ class AnggotaController extends Controller
     {
         $search = $request->string('search')->trim()->toString();
         $anggotas = Anggota::query()
+            ->withCount(['peminjamans as pinjaman_aktif_count' => fn ($query) => $query->where('status', 'dipinjam')])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('nama', 'like', "%{$search}%")
@@ -23,7 +24,11 @@ class AnggotaController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('anggotas.index', compact('anggotas', 'search'));
+        $totalAnggota = Anggota::count();
+        $anggotaAktif = Anggota::where('aktif', true)->count();
+        $anggotaTidakAktif = Anggota::where('aktif', false)->count();
+
+        return view('anggotas.index', compact('anggotas', 'search', 'totalAnggota', 'anggotaAktif', 'anggotaTidakAktif'));
     }
 
     public function create()

@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Peminjaman extends Model
 {
     protected $table = 'peminjamans';
 
     protected $fillable = [
-        'anggota_id',
+        'nis_nip',
         'buku_id',
         'tanggal_pinjam',
         'batas_pengembalian',
@@ -32,7 +33,7 @@ class Peminjaman extends Model
 
     public function anggota(): BelongsTo
     {
-        return $this->belongsTo(Anggota::class);
+        return $this->belongsTo(Anggota::class, 'nis_nip', 'nis_nip');
     }
 
     public function buku(): BelongsTo
