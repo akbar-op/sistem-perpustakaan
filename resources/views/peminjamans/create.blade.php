@@ -5,14 +5,12 @@
         <div class="mx-auto max-w-[1440px] px-5 py-6 lg:px-8">
             <header class="flex items-center justify-end border-b border-[#e3e8f1] pb-4">
                 <div class="flex items-center gap-3">
-                    <div class="hidden h-10 w-56 items-center rounded-full border border-[#dfe7f5] bg-white px-3 text-sm text-[#8ea0bf] shadow-sm sm:flex">
-                        <span class="mr-2 text-lg">⌕</span>
-                        <span>Pencarian</span>
-                    </div>
+                    @include('layout.search')
                     <button type="button" aria-label="Notifikasi" class="relative grid h-10 w-10 place-items-center rounded-full border border-[#e1e7f1] bg-white text-lg text-[#8797b2] shadow-sm">
                         <img src="{{ asset('image/notification.png') }}" alt="Notifikasi" class="h-5 w-5 object-contain">
                         <span class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#4561e8] px-1 text-[10px] font-bold text-white">3</span>
                     </button>
+                    @include('layout.theme-toggle')
                     <div class="grid h-10 w-10 place-items-center rounded-full bg-[#2d9bd2] text-sm font-bold text-white shadow-sm">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>

@@ -31,6 +31,11 @@ class Buku extends Model
         ];
     }
 
+    public function getStatusAttribute(): string
+    {
+        return $this->stok > 0 ? 'Tersedia' : 'Stok Habis';
+    }
+
     public function peminjamans(): BelongsToMany
     {
         return $this->belongsToMany(Peminjaman::class);

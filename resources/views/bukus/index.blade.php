@@ -5,10 +5,12 @@
         <div class="mx-auto max-w-[1440px] px-5 py-6 lg:px-8">
             <header class="flex items-center justify-end border-b border-[#e3e8f1] pb-4">
                 <div class="flex items-center gap-3">
+                    @include('layout.search')
                     <button type="button" aria-label="Notifikasi" class="relative grid h-11 w-11 place-items-center rounded-full border border-[#e1e7f1] bg-white text-lg text-[#8797b2] shadow-sm">
                         <img src="{{ asset('image/notification.png') }}" alt="Notifikasi" class="h-5 w-5 object-contain">
                         <span class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#4561e8] px-1 text-[10px] font-bold text-white">3</span>
                     </button>
+                    @include('layout.theme-toggle')
                     <div class="grid h-10 w-10 place-items-center rounded-full bg-[#2d9bd2] text-sm font-bold text-white shadow-sm">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
@@ -22,7 +24,7 @@
                 </div>
 
                 <a href="{{ route('bukus.create') }}" class="inline-flex items-center justify-center rounded-xl bg-[#4561e8] px-5 py-3 text-base font-semibold text-white shadow-[0_8px_18px_rgba(69,97,232,0.28)] transition hover:bg-[#304bc3]">
-                    + Tambah Buku
+                    + Tambah
                 </a>
             </div>
 
@@ -86,6 +88,9 @@
                             <p class="line-clamp-4 text-sm leading-6 text-[#5d7396]">
                                 {{ $buku->penerbit }} • {{ $buku->tahun_terbit ?? '2024' }}
                             </p>
+                            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $buku->stok > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">
+                                {{ $buku->status }}
+                            </span>
 
                             <a href="{{ route('bukus.show', $buku) }}" class="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-[#a9c0ff] bg-white px-4 py-2.5 text-sm font-semibold text-[#30415e] transition hover:bg-[#f3f7ff]">
                                 Detail

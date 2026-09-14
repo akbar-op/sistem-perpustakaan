@@ -9,17 +9,12 @@
                     <p class="mt-1 text-base font-bold text-[#34445f]">Profile</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="hidden h-10 w-56 items-center rounded-full border border-[#4561e8] bg-white px-3 text-sm text-[#8ea0bf] sm:flex">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="11" cy="11" r="7"></circle>
-                            <path d="m20 20-4-4"></path>
-                        </svg>
-                        Pencarian
-                    </div>
+                    @include('layout.search')
                     <button type="button" aria-label="Notifikasi" class="relative grid h-10 w-10 place-items-center rounded-full border border-[#e1e7f1] bg-white text-[#8797b2] shadow-sm">
                         <img src="{{ asset('image/notification.png') }}" alt="" class="h-5 w-5 object-contain">
                         <span class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#4561e8] px-1 text-[10px] font-bold text-white">3</span>
                     </button>
+                    @include('layout.theme-toggle')
                     <div class="grid h-10 w-10 place-items-center rounded-full bg-[#2d9bd2] text-sm font-bold text-white shadow-sm">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </div>
