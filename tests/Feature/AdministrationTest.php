@@ -4,6 +4,7 @@ use App\Models\Buku;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\InitialAdminSeeder;
+use Database\Seeders\InitialStaffAccountsSeeder;
 use App\Console\Commands\ResetAdminPassword;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -171,4 +172,52 @@ test('admin navigation exposes management tools while staff navigation stays sco
         ->assertSee(route('anggotas.index'))
         ->assertDontSee(route('kategoris.index'))
         ->assertDontSee(route('setting'));
+});
+
+test('initial staff accounts can log in as petugas and kepala sekolah', function () {
+    $accounts = [
+        [
+            'role' => 'petugas',
+            'name' => 'Petugas Bootstrap',
+            'email' => 'petugas-bootstrap@example.com',
+            'password' => 'petugas-bootstrap-password',
+        ],
+        [
+            'role' => 'kepala_sekolah',
+            'name' => 'Kepala Bootstrap',
+            'email' => 'kepala-bootstrap@example.com',
+            'password' => 'kepala-bootstrap-password',
+        ],
+    ];
+
+    foreach ($accounts as $account) {
+        Config::set('admin.staff_bootstrap', $account);
+        $this->seed(InitialStaffAccountsSeeder::class);
+
+        $user = User::where('email', $account['email'])->firstOrFail();
+
+        expect($user->role)->toBe($account['role'])
+            ->and(Hash::check($account['password'], $user->password))->toBeTrue();
+
+        $this->post('/login', [
+            'email' => $account['email'],
+            'password' => $account['password'],
+        ])->assertRedirect('/dashboard');
+
+        $this->assertAuthenticatedAs($user);
+        $this->post('/logout')->assertRedirect('/login');
+    }
+});
+
+test('initial staff seeder refuses to create duplicate role accounts', function () {
+    User::factory()->create(['role' => 'petugas']);
+    Config::set('admin.staff_bootstrap', [
+        'role' => 'petugas',
+        'name' => 'Petugas',
+        'email' => 'petugas@example.com',
+        'password' => 'petugas-long-password',
+    ]);
+
+    expect(fn () => $this->seed(InitialStaffAccountsSeeder::class))
+        ->toThrow(LogicException::class);
 });
