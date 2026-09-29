@@ -9,7 +9,6 @@
         ['label' => 'Peminjaman', 'route' => 'peminjamans.create', 'active' => 'peminjamans.create', 'icon' => 'arrow-up.png', 'roles' => ['admin', 'petugas']],
         ['label' => 'Pengembalian', 'route' => 'peminjamans.index', 'query' => ['status' => 'dipinjam'], 'active' => 'peminjamans.index', 'activeStatus' => 'dipinjam', 'icon' => 'arrow-down.png', 'roles' => ['admin', 'petugas']],
         ['label' => 'Anggota', 'route' => 'anggotas.index', 'active' => 'anggotas.*', 'icon' => 'user.png', 'roles' => ['admin', 'petugas']],
-        ['label' => 'Kategori', 'route' => 'kategoris.index', 'active' => 'kategoris.*', 'icon' => 'book.png', 'roles' => ['admin']],
         ['label' => 'Laporan', 'route' => 'laporan.index', 'active' => 'laporan.*', 'icon' => 'time.png', 'roles' => ['admin', 'petugas', 'kepala_sekolah']],
         ['label' => 'Profil', 'route' => 'profil', 'active' => 'profil*', 'icon' => 'profil.png', 'roles' => ['admin', 'petugas', 'siswa']],
         ['label' => 'Pengaturan', 'route' => 'setting', 'active' => 'setting', 'icon' => 'settings.png', 'roles' => ['admin', 'kepala_sekolah']],

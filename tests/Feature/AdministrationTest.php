@@ -162,7 +162,7 @@ test('admin navigation exposes management tools while staff navigation stays sco
         ->get('/bukus')
         ->assertSuccessful()
         ->assertSee(route('anggotas.index'))
-        ->assertSee(route('kategoris.index'))
+        ->assertDontSee(route('kategoris.index'))
         ->assertDontSee(route('raks.index'));
 
     $this->actingAs(User::factory()->create(['role' => 'petugas']))
