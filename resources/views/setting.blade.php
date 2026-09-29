@@ -26,66 +26,60 @@
                 <p class="mt-1 text-sm text-[#7b8eaf]">Atur preferensi sistem dan konfigurasi</p>
             </section>
 
-            <section class="mt-14 grid max-w-[800px] gap-14 xl:grid-cols-[1fr_240px]" aria-label="Pengaturan perpustakaan">
-                <div>
-                    <h2 class="text-base font-bold text-[#344563]">Pengaturan Perpustakaan</h2>
-                    <div class="mt-4 space-y-4">
-                        <div>
-                            <label for="nama_perpustakaan" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">Nama Perpustakaan</label>
-                            <input id="nama_perpustakaan" type="text" value="Perpustakaan Sekolah" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
+            <form action="{{ route('setting.update') }}" method="POST" class="mt-10 max-w-[900px]">
+                @csrf
+                @method('PUT')
+                @if (session('success'))
+                    <p role="status" class="mb-5 rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-800">{{ session('success') }}</p>
+                @endif
+                <section class="grid gap-10 xl:grid-cols-[1fr_260px]" aria-label="Pengaturan perpustakaan">
+                    <div>
+                        <h2 class="text-base font-bold text-[#344563]">Pengaturan Perpustakaan</h2>
+                        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                            @foreach ([
+                                'library_name' => ['Nama perpustakaan', 'text'],
+                                'address' => ['Alamat', 'text'],
+                                'email' => ['Email', 'email'],
+                                'whatsapp' => ['WhatsApp', 'tel'],
+                            ] as $field => [$label, $type])
+                                <div>
+                                    <label for="{{ $field }}" class="mb-1.5 block text-sm font-semibold text-[#536b8a]">{{ $label }}</label>
+                                    <input id="{{ $field }}" name="{{ $field }}" type="{{ $type }}" value="{{ old($field, $settings->$field) }}" required class="w-full rounded-lg border border-[#cbd5e1] bg-white px-3 py-2.5 text-sm text-[#344563] focus:border-[#4561e8] focus:outline-none focus:ring-2 focus:ring-[#4561e8]/20">
+                                    @error($field)<p class="mt-1 text-sm text-red-700">{{ $message }}</p>@enderror
+                                </div>
+                            @endforeach
                         </div>
-                        <div>
-                            <label for="alamat" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">Alamat</label>
-                            <input id="alamat" type="text" value="Perpustakaan Sekolah" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
-                        </div>
-                        <div>
-                            <label for="email" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">Email</label>
-                            <input id="email" type="email" value="Perpustakaan Sekolah" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
-                        </div>
-                        <div>
-                            <label for="whatsapp" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">WhatsApp</label>
-                            <input id="whatsapp" type="tel" value="+62 8123456789" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
+
+                        <h2 class="mt-10 text-base font-bold text-[#344563]">Peraturan Peminjaman</h2>
+                        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                            @foreach ([
+                                'max_books' => ['Maks. buku per anggota', 1, 50],
+                                'loan_duration_days' => ['Durasi pinjam (hari)', 1, 365],
+                                'fine_per_day' => ['Denda per hari (Rp)', 0, 1000000],
+                                'renewal_limit' => ['Batas perpanjangan', 0, 10],
+                            ] as $field => [$label, $minimum, $maximum])
+                                <div>
+                                    <label for="{{ $field }}" class="mb-1.5 block text-sm font-semibold text-[#536b8a]">{{ $label }}</label>
+                                    <input id="{{ $field }}" name="{{ $field }}" type="number" min="{{ $minimum }}" max="{{ $maximum }}" value="{{ old($field, $settings->$field) }}" required class="w-full rounded-lg border border-[#cbd5e1] bg-white px-3 py-2.5 text-sm text-[#344563] focus:border-[#4561e8] focus:outline-none focus:ring-2 focus:ring-[#4561e8]/20">
+                                    @error($field)<p class="mt-1 text-sm text-red-700">{{ $message }}</p>@enderror
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
-                    <h2 class="mt-14 text-base font-bold text-[#344563]">Peraturan Peminjaman</h2>
-                    <div class="mt-4 grid gap-x-16 gap-y-4 sm:grid-cols-2">
-                        <div>
-                            <label for="maks_buku" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">Maks. buku per anggota</label>
-                            <input id="maks_buku" type="number" value="5" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
-                        </div>
-                        <div>
-                            <label for="durasi" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">Waktu paling lama (hari)</label>
-                            <input id="durasi" type="number" value="14" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
-                        </div>
-                        <div>
-                            <label for="denda" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">Denda Perhari</label>
-                            <input id="denda" type="text" value="Rp 7.000,00" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
-                        </div>
-                        <div>
-                            <label for="pembaruan" class="mb-1.5 block text-xs font-semibold text-[#657b9f]">Batas Pembaruan</label>
-                            <input id="pembaruan" type="number" value="2" class="h-8 w-full rounded-none border border-[#9db7ff] bg-white px-2 text-base text-[#344563] outline-none focus:border-[#4561e8] focus:ring-1 focus:ring-[#cfe1ff]">
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h2 class="text-base font-bold text-[#344563]">Preferensi</h2>
-                    <div class="mt-4 space-y-7">
-                        <label class="flex cursor-pointer items-start justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-[#344563]">Preferensi</h2>
+                        <label class="mt-4 flex cursor-pointer items-start justify-between gap-4">
                             <span>
-                                <span class="block text-xs font-bold text-[#344563]">Notifikasi email</span>
-                                <span class="mt-1 block text-xs font-semibold leading-4 text-[#657b9f]">Dapatkan peringatan untuk buku yang terlambat dikembalikan.</span>
+                                <span class="block text-sm font-semibold text-[#344563]">Notifikasi email</span>
+                                <span class="mt-1 block text-xs leading-5 text-[#657b9f]">Peringatan untuk buku yang terlambat dikembalikan.</span>
                             </span>
-                            <span class="relative mt-1 inline-flex shrink-0">
-                                <input type="checkbox" checked class="peer sr-only">
-                                <span class="h-6 w-10 rounded-full bg-[#d8dfe9] transition peer-checked:bg-[#4eb45b]"></span>
-                                <span class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-                            </span>
+                            <input type="checkbox" name="email_notifications" value="1" @checked(old('email_notifications', $settings->email_notifications)) class="mt-1 h-5 w-5 accent-[#4561e8]">
                         </label>
                     </div>
-                </div>
-            </section>
+                </section>
+                <button type="submit" class="mt-8 rounded-lg bg-[#4561e8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#304bc3]">Simpan pengaturan</button>
+            </form>
         </div>
     </main>
 @endsection

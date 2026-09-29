@@ -44,35 +44,31 @@
                         <p class="text-xs text-[#8aa0c2]">Total Transaksi</p>
                     </div>
 
-                    <div class="mt-12 rounded-2xl border border-[#e7ebf2] bg-white px-5 py-4 shadow-[0_2px_3px_rgba(31,45,68,0.22)]">
+                    <form action="{{ route('profil.update') }}" method="POST" class="mt-12 rounded-xl border border-[#e7ebf2] bg-white px-5 py-5 shadow-sm">
+                        @csrf
+                        @method('PUT')
                         <h2 class="text-xl font-bold text-[#344563]">Informasi Pribadi</h2>
-                        <dl class="mt-3 grid grid-cols-1 gap-x-10 gap-y-5 sm:grid-cols-2">
-                            <div>
-                                <dt class="text-xs text-[#8aa0c2]">Nama Lengkap</dt>
-                                <dd class="mt-1 text-base font-bold text-[#25344d]">{{ $user->name }}</dd>
+                        @if (session('success'))
+                            <p role="status" class="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm font-medium text-green-800">{{ session('success') }}</p>
+                        @endif
+                        @foreach (['name' => 'Nama lengkap', 'email' => 'Email'] as $field => $label)
+                            <div class="mt-4">
+                                <label for="{{ $field }}" class="mb-1.5 block text-sm font-semibold text-[#536b8a]">{{ $label }}</label>
+                                <input id="{{ $field }}" name="{{ $field }}" type="{{ $field === 'email' ? 'email' : 'text' }}" value="{{ old($field, $user->$field) }}" required autocomplete="{{ $field === 'name' ? 'name' : 'email' }}" class="w-full rounded-lg border border-[#cbd5e1] px-3 py-2.5 text-sm text-[#25344d] focus:border-[#4561e8] focus:outline-none focus:ring-2 focus:ring-[#4561e8]/20">
+                                @error($field)<p class="mt-1 text-sm text-red-700">{{ $message }}</p>@enderror
                             </div>
-                            <div>
-                                <dt class="text-xs text-[#8aa0c2]">Email</dt>
-                                <dd class="mt-1 break-words text-base font-bold text-[#25344d]">{{ $user->email }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs text-[#8aa0c2]">Nomor Handphone</dt>
-                                <dd class="mt-1 text-base font-bold text-[#25344d]">-</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs text-[#8aa0c2]">Alamat</dt>
-                                <dd class="mt-1 text-base font-bold text-[#25344d]">-</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs text-[#8aa0c2]">Employee</dt>
-                                <dd class="mt-1 text-base font-bold capitalize text-[#25344d]">{{ str_replace('_', ' ', $user->role) }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs text-[#8aa0c2]">Nama Lengkap</dt>
-                                <dd class="mt-1 text-base font-bold text-[#25344d]">{{ $user->name }}</dd>
-                            </div>
-                        </dl>
-                    </div>
+                        @endforeach
+                        <div class="mt-6 border-t border-[#e7ebf2] pt-5">
+                            <h3 class="text-sm font-bold text-[#344563]">Ubah kata sandi</h3>
+                            <p class="mt-1 text-xs text-[#7b8eaf]">Kosongkan jika tidak ingin mengganti kata sandi.</p>
+                            <label for="password" class="mb-1.5 mt-4 block text-sm font-semibold text-[#536b8a]">Kata sandi baru</label>
+                            <input id="password" name="password" type="password" autocomplete="new-password" class="w-full rounded-lg border border-[#cbd5e1] px-3 py-2.5 text-sm text-[#25344d] focus:border-[#4561e8] focus:outline-none focus:ring-2 focus:ring-[#4561e8]/20">
+                            @error('password')<p class="mt-1 text-sm text-red-700">{{ $message }}</p>@enderror
+                            <label for="password_confirmation" class="mb-1.5 mt-4 block text-sm font-semibold text-[#536b8a]">Konfirmasi kata sandi</label>
+                            <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" class="w-full rounded-lg border border-[#cbd5e1] px-3 py-2.5 text-sm text-[#25344d] focus:border-[#4561e8] focus:outline-none focus:ring-2 focus:ring-[#4561e8]/20">
+                        </div>
+                        <button type="submit" class="mt-6 rounded-lg bg-[#4561e8] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#304bc3]">Simpan perubahan</button>
+                    </form>
                 </div>
             </section>
         </div>

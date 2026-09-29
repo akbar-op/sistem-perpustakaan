@@ -22,7 +22,7 @@
                     <p class="text-sm font-semibold text-[#4561e8]">Katalog Buku</p>
                     <h1 class="mt-1 text-4xl font-bold tracking-tight text-[#1f2d44]">Detail Buku</h1>
                 </div>
-                <a href="{{ route('bukus.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-[#dfe7f5] bg-white px-4 py-2.5 text-sm font-semibold text-[#30415e] shadow-sm transition hover:bg-[#f3f7ff]">
+                <a href="{{ route(auth()->user()->isStudent() ? 'katalog-buku.index' : 'bukus.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-[#dfe7f5] bg-white px-4 py-2.5 text-sm font-semibold text-[#30415e] shadow-sm transition hover:bg-[#f3f7ff]">
                     <span aria-hidden="true">&larr;</span>
                     Kembali ke daftar
                 </a>
@@ -82,8 +82,10 @@
                     </dl>
 
                     <div class="mt-8 flex flex-wrap gap-3 border-t border-[#edf0f5] pt-6">
-                        <a href="{{ route('bukus.edit', $buku) }}" class="inline-flex items-center justify-center rounded-xl bg-[#4561e8] px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(69,97,232,0.24)] transition hover:bg-[#304bc3]">Edit Buku</a>
-                        <a href="{{ route('bukus.index') }}" class="inline-flex items-center justify-center rounded-xl border border-[#dfe7f5] bg-white px-5 py-3 text-sm font-semibold text-[#30415e] transition hover:bg-[#f3f7ff]">Kembali</a>
+                        @unless (auth()->user()->isStudent())
+                            <a href="{{ route('bukus.edit', $buku) }}" class="inline-flex items-center justify-center rounded-xl bg-[#4561e8] px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(69,97,232,0.24)] transition hover:bg-[#304bc3]">Edit Buku</a>
+                        @endunless
+                        <a href="{{ route(auth()->user()->isStudent() ? 'katalog-buku.index' : 'bukus.index') }}" class="inline-flex items-center justify-center rounded-xl border border-[#dfe7f5] bg-white px-5 py-3 text-sm font-semibold text-[#30415e] transition hover:bg-[#f3f7ff]">Kembali</a>
                     </div>
                 </div>
             </section>

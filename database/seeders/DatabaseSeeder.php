@@ -8,6 +8,7 @@ use App\Models\Peminjaman;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use LogicException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,6 +19,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            throw new LogicException('DatabaseSeeder contains demo accounts and data; it cannot run in production.');
+        }
+
         User::factory()->create([
             'name' => 'Administrator',
             'email' => 'admin@perpustakaan.test',

@@ -14,10 +14,11 @@ class PeminjamanController extends Controller
     public function index(Request $request)
     {
         $search = trim((string) $request->input('search', ''));
+        $status = $request->string('status', 'dipinjam')->toString();
+        abort_unless(in_array($status, ['dipinjam', 'dikembalikan'], true), 404);
 
         $peminjamans = Peminjaman::with(['anggota', 'buku'])
-            ->where('status', 'dipinjam')
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->where('status', $status)
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->whereHas('anggota', fn ($anggotaQuery) => $anggotaQuery->where('nama', 'like', "%{$search}%"))
@@ -28,7 +29,29 @@ class PeminjamanController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('peminjamans.index', compact('peminjamans', 'search'));
+        return view('peminjamans.index', compact('peminjamans', 'search', 'status'));
+    }
+
+    public function mine(Request $request)
+    {
+        abort_unless($request->user()->email, 403, 'Akun belum terhubung dengan data anggota perpustakaan.');
+
+        $anggota = Anggota::query()
+            ->where('email', $request->user()->email)
+            ->get(['nis_nip']);
+        abort_unless($anggota->count() === 1 && $anggota->first()->nis_nip, 403, 'Akun belum terhubung dengan satu data anggota.');
+
+        $status = $request->string('status', 'dipinjam')->toString();
+        abort_unless(in_array($status, ['dipinjam', 'dikembalikan'], true), 404);
+
+        $peminjamans = Peminjaman::with('buku')
+            ->where('status', $status)
+            ->where('nis_nip', $anggota->first()->nis_nip)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('peminjamans.mine', compact('peminjamans', 'status'));
     }
 
     public function create()
@@ -106,6 +129,7 @@ class PeminjamanController extends Controller
             $buku->increment('stok');
         });
 
-        return redirect()->route('peminjamans.index')->with('success', 'Pengembalian berhasil dicatat.');
+        return redirect()->route('peminjamans.index', ['status' => 'dikembalikan'])
+            ->with('success', 'Pengembalian berhasil dicatat.');
     }
 }

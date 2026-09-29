@@ -16,7 +16,9 @@ class BukuController extends Controller
     public function index(Request $request)
     {
         $search = $request->string('search')->trim()->toString();
+        $kategoriId = $request->integer('kategori_id') ?: null;
         $bukus = Buku::query()
+            ->when($kategoriId, fn ($query) => $query->where('kategori_id', $kategoriId))
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('judul', 'like', "%{$search}%")
@@ -27,14 +29,17 @@ class BukuController extends Controller
             ->latest()
             ->paginate(10)
             ->withQueryString();
+        $kategoris = Kategori::orderBy('nama')->get(['id', 'nama']);
 
-        return view('bukus.index', compact('bukus', 'search'));
+        return view('bukus.index', compact('bukus', 'search', 'kategoris', 'kategoriId'));
     }
 
     public function catalog(Request $request)
     {
         $search = $request->string('search')->trim()->toString();
+        $kategoriId = $request->integer('kategori_id') ?: null;
         $bukus = Buku::with(['kategori', 'rak'])
+            ->when($kategoriId, fn ($query) => $query->where('kategori_id', $kategoriId))
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('judul', 'like', "%{$search}%")
@@ -45,8 +50,9 @@ class BukuController extends Controller
             ->latest()
             ->paginate(12)
             ->withQueryString();
+        $kategoris = Kategori::orderBy('nama')->get(['id', 'nama']);
 
-        return view('bukus.catalog', compact('bukus', 'search'));
+        return view('bukus.catalog', compact('bukus', 'search', 'kategoris', 'kategoriId'));
     }
 
     /**

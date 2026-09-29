@@ -2,6 +2,11 @@
 
 use App\Models\Buku;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\InitialAdminSeeder;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 test('admin and petugas can log in', function () {
     $user = User::factory()->create([
@@ -16,6 +21,41 @@ test('admin and petugas can log in', function () {
     ])->assertRedirect('/dashboard');
 
     $this->assertAuthenticatedAs($user);
+});
+
+test('initial admin seeder hashes the configured password', function () {
+    Config::set('admin.bootstrap', [
+        'name' => 'Initial Admin',
+        'email' => 'initial-admin@example.com',
+        'password' => 'correct-horse-battery-staple',
+    ]);
+
+    $this->seed(InitialAdminSeeder::class);
+
+    $admin = User::where('email', 'initial-admin@example.com')->firstOrFail();
+
+    expect($admin->role)->toBe('admin')
+        ->and(Hash::check('correct-horse-battery-staple', $admin->password))->toBeTrue()
+        ->and($admin->password)->not->toBe('correct-horse-battery-staple');
+});
+
+test('initial admin seeder refuses to create a second admin', function () {
+    User::factory()->create(['role' => 'admin']);
+    Config::set('admin.bootstrap', [
+        'name' => 'Second Admin',
+        'email' => 'second-admin@example.com',
+        'password' => 'correct-horse-battery-staple',
+    ]);
+
+    expect(fn () => $this->seed(InitialAdminSeeder::class))
+        ->toThrow(LogicException::class);
+});
+
+test('demo database seeder refuses to run in production', function () {
+    app()->detectEnvironment(fn () => 'production');
+
+    expect(fn () => app(DatabaseSeeder::class)->run())
+        ->toThrow(LogicException::class);
 });
 
 test('petugas cannot manage categories', function () {
@@ -60,4 +100,48 @@ test('kepala sekolah can only review borrowing reports', function () {
     $this->get('/laporan/peminjaman/excel')->assertSuccessful();
     $this->get('/laporan/buku/excel')->assertForbidden();
     $this->get('/bukus')->assertForbidden();
+    $this->get('/setting')->assertSuccessful();
+    $this->get('/profil')->assertForbidden();
+
+    $this->put('/setting', [
+        'library_name' => 'Perpustakaan Utama',
+        'address' => 'Jl. Sekolah 1',
+        'email' => 'library@example.com',
+        'whatsapp' => '+62 8120000000',
+        'max_books' => 4,
+        'loan_duration_days' => 10,
+        'fine_per_day' => 5000,
+        'renewal_limit' => 1,
+        'email_notifications' => true,
+    ])->assertRedirect('/setting');
+
+    expect(DB::table('library_settings')->value('library_name'))->toBe('Perpustakaan Utama');
+});
+
+test('staff can access operational pages but cannot access settings', function () {
+    $this->actingAs(User::factory()->create(['role' => 'petugas']));
+
+    $this->get('/dashboard')->assertSuccessful();
+    $this->get('/bukus')->assertSuccessful();
+    $this->get('/peminjamans')->assertSuccessful();
+    $this->get('/laporan')->assertSuccessful();
+    $this->get('/profil')->assertSuccessful();
+    $this->get('/setting')->assertForbidden();
+    $this->put('/setting', [])->assertForbidden();
+});
+
+test('admin navigation exposes management tools while staff navigation stays scoped', function () {
+    $this->actingAs(User::factory()->create(['role' => 'admin']))
+        ->get('/bukus')
+        ->assertSuccessful()
+        ->assertSee(route('anggotas.index'))
+        ->assertSee(route('kategoris.index'))
+        ->assertDontSee(route('raks.index'));
+
+    $this->actingAs(User::factory()->create(['role' => 'petugas']))
+        ->get('/bukus')
+        ->assertSuccessful()
+        ->assertSee(route('anggotas.index'))
+        ->assertDontSee(route('kategoris.index'))
+        ->assertDontSee(route('setting'));
 });
