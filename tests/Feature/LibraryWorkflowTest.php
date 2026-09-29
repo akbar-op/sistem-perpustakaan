@@ -69,6 +69,30 @@ test('book lists can be filtered by category', function () {
         ->assertDontSee('Cerita Fiksi');
 });
 
+test('book cards show stock count and availability colors by threshold', function () {
+    foreach ([0, 1, 2, 4, 5, 6, 7] as $stock) {
+        Buku::create([
+            'kode_buku' => "BK-STOCK-{$stock}",
+            'judul' => "Buku Stok {$stock}",
+            'penulis' => 'Penulis',
+            'penerbit' => 'Sekolah',
+            'stok' => $stock,
+        ]);
+    }
+
+    $this->get('/bukus')
+        ->assertSuccessful()
+        ->assertSee('Buku Habis')
+        ->assertSee('Tersisa 0 buku')
+        ->assertSee('Tersisa 1 buku')
+        ->assertSee('Tersisa 7 buku')
+        ->assertSee('bg-gray-100 text-gray-700', false)
+        ->assertSee('bg-red-50 text-red-700', false)
+        ->assertSee('bg-amber-50 text-amber-800', false)
+        ->assertSee('bg-emerald-50 text-emerald-700', false)
+        ->assertSee('bg-slate-100 text-slate-700', false);
+});
+
 test('borrowing decreases stock and returning increases it', function () {
     $anggota = Anggota::create([
         'nomor_anggota' => 'AG-001',

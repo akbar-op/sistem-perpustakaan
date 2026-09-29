@@ -4,11 +4,16 @@ use App\Models\Buku;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\InitialAdminSeeder;
+use App\Console\Commands\ResetAdminPassword;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 test('admin and petugas can log in', function () {
+    expect(app()->environment())->toBe('testing')
+        ->and(app()->runningInConsole())->toBeTrue()
+        ->and(app()->runningUnitTests())->toBeTrue();
+
     $user = User::factory()->create([
         'email' => 'admin@example.com',
         'role' => 'admin',
@@ -51,11 +56,33 @@ test('initial admin seeder refuses to create a second admin', function () {
         ->toThrow(LogicException::class);
 });
 
-test('demo database seeder refuses to run in production', function () {
-    app()->detectEnvironment(fn () => 'production');
+test('admin password reset command changes the password without exposing it', function () {
+    $admin = User::factory()->create([
+        'email' => 'reset-admin@example.com',
+        'role' => 'admin',
+        'password' => 'old-admin-password',
+    ]);
 
-    expect(fn () => app(DatabaseSeeder::class)->run())
-        ->toThrow(LogicException::class);
+    $this->artisan('admin:reset-password', ['email' => $admin->email])
+        ->expectsQuestion('New password (minimum 16 characters)', 'a-long-new-admin-password')
+        ->expectsQuestion('Confirm new password', 'a-long-new-admin-password')
+        ->expectsOutput('Admin password updated.')
+        ->assertExitCode(0);
+
+    expect(Hash::check('a-long-new-admin-password', $admin->fresh()->password))->toBeTrue()
+        ->and(Hash::check('old-admin-password', $admin->fresh()->password))->toBeFalse();
+});
+
+test('demo database seeder refuses to run in production', function () {
+    $environment = app()->environment();
+    app()->instance('env', 'production');
+
+    try {
+        expect(fn () => app(DatabaseSeeder::class)->run())
+            ->toThrow(LogicException::class);
+    } finally {
+        app()->instance('env', $environment);
+    }
 });
 
 test('petugas cannot manage categories', function () {

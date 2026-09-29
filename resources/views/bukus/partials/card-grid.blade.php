@@ -8,10 +8,20 @@
                 ['from' => '#f0ebd7', 'to' => '#d8bc6f', 'text' => '#41371b'],
             ];
             $palette = $palettes[$loop->index % count($palettes)];
+            $stockState = match (true) {
+                $buku->stok === 0 => ['label' => 'Buku Habis', 'badge' => 'bg-gray-100 text-gray-700'],
+                $buku->stok === 1 => ['label' => 'Tersedia', 'badge' => 'bg-red-50 text-red-700'],
+                $buku->stok < 5 => ['label' => 'Tersedia', 'badge' => 'bg-amber-50 text-amber-800'],
+                $buku->stok > 6 => ['label' => 'Tersedia', 'badge' => 'bg-emerald-50 text-emerald-700'],
+                default => ['label' => 'Tersedia', 'badge' => 'bg-slate-100 text-slate-700'],
+            };
+            $coverStyle = $buku->stok === 0
+                ? 'background: linear-gradient(135deg, #e5e7eb, #9ca3af); color: #374151;'
+                : "background: linear-gradient(135deg, {$palette['from']}, {$palette['to']}); color: {$palette['text']};";
         @endphp
 
-        <article class="rounded-[22px] border border-[#dfe7f5] bg-white p-4 shadow-[0_2px_8px_rgba(31,45,68,0.06)] transition hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(69,97,232,0.12)]">
-            <div class="mx-auto mb-5 flex h-52 w-40 items-center justify-center rounded-[18px] border border-[#d9dfe9] bg-gradient-to-br shadow-inner" style="background: linear-gradient(135deg, {{ $palette['from'] }}, {{ $palette['to'] }}); color: {{ $palette['text'] }};">
+        <article class="rounded-[22px] border p-4 shadow-[0_2px_8px_rgba(31,45,68,0.06)] transition hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(69,97,232,0.12)] {{ $buku->stok === 0 ? 'border-gray-300 bg-gray-100' : 'border-[#dfe7f5] bg-white' }}">
+            <div class="mx-auto mb-5 flex h-52 w-40 items-center justify-center rounded-[18px] border border-[#d9dfe9] bg-gradient-to-br shadow-inner" style="{{ $coverStyle }}">
                 <div class="flex h-full w-full flex-col items-center justify-center px-3 text-center">
                     <div class="mb-2 h-10 w-10 rounded-full border border-current/50 bg-white/20 backdrop-blur-sm"></div>
                     <div class="text-[10px] font-bold uppercase tracking-[0.14em] leading-relaxed">
@@ -34,9 +44,12 @@
                 <p class="line-clamp-4 text-sm leading-6 text-[#5d7396]">
                     {{ $buku->penerbit }} • {{ $buku->tahun_terbit ?? '2024' }}
                 </p>
-                <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $buku->stok > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">
-                    {{ $buku->status }}
-                </span>
+                <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $stockState['badge'] }}">
+                        {{ $stockState['label'] }}
+                    </span>
+                    <span class="text-xs font-medium text-[#536b8a]">Tersisa {{ $buku->stok }} buku</span>
+                </div>
 
                 <a href="{{ route($isStudent ? 'katalog-buku.show' : 'bukus.show', $buku) }}" class="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-[#a9c0ff] bg-white px-4 py-2.5 text-sm font-semibold text-[#30415e] transition hover:bg-[#f3f7ff]">
                     Detail

@@ -27,7 +27,7 @@ class InitialAdminSeeder extends Seeder
         $validated = Validator::make($credentials, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:16', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'max:255'],
         ])->validate();
 
         User::create([
