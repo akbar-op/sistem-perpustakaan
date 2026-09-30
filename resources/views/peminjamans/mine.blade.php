@@ -9,6 +9,14 @@
                 <p class="mt-1 text-sm text-[#5d7396]">Buku yang sedang dipinjam dan riwayat pengembalian.</p>
             </header>
 
+            @if (session('success'))
+                <div role="status" class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">{{ session('success') }}</div>
+            @endif
+
+            @if (session('error'))
+                <div role="alert" class="mt-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-800">{{ session('error') }}</div>
+            @endif
+
             <nav class="mt-6 flex gap-2 border-b border-[#e3e8f1]" aria-label="Filter peminjaman">
                 <a href="{{ route('peminjamans.mine', ['status' => 'dipinjam']) }}" @if ($status === 'dipinjam') aria-current="page" @endif class="border-b-2 px-4 py-3 text-sm font-semibold {{ $status === 'dipinjam' ? 'border-[#4561e8] text-[#304bc3]' : 'border-transparent text-[#657b9f] hover:text-[#304bc3]' }}">Sedang dipinjam</a>
                 <a href="{{ route('peminjamans.mine', ['status' => 'dikembalikan']) }}" @if ($status === 'dikembalikan') aria-current="page" @endif class="border-b-2 px-4 py-3 text-sm font-semibold {{ $status === 'dikembalikan' ? 'border-[#4561e8] text-[#304bc3]' : 'border-transparent text-[#657b9f] hover:text-[#304bc3]' }}">Riwayat</a>

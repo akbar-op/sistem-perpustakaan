@@ -5,9 +5,82 @@ use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Peminjaman;
 use App\Models\User;
+use Database\Seeders\InitialBookCategoriesSeeder;
 
 beforeEach(function () {
     $this->actingAs(User::factory()->create(['role' => 'petugas']));
+});
+
+test('petugas can add books from the web form', function () {
+    $this->seed(InitialBookCategoriesSeeder::class);
+    $this->seed(InitialBookCategoriesSeeder::class);
+
+    $this->get('/bukus/create')
+        ->assertSuccessful()
+        ->assertSee('Tambah Buku')
+        ->assertSee('name="kode_buku"', false)
+        ->assertSee('name="kategori_id"', false)
+        ->assertSee('Fiksi')
+        ->assertSee('Sains')
+        ->assertSee('Sejarah')
+        ->assertSee('name="rak_id"', false);
+
+    $kategori = Kategori::where('nama', 'Fiksi')->firstOrFail();
+
+    $this->post('/bukus', [
+        'kode_buku' => 'BK-WEB-001',
+        'judul' => 'Buku dari Form Web',
+        'penulis' => 'Penulis Web',
+        'penerbit' => 'Penerbit Sekolah',
+        'tahun_terbit' => 2024,
+        'isbn' => '9780000000001',
+        'kategori_id' => $kategori->id,
+        'stok' => 5,
+    ])->assertRedirect('/bukus');
+
+    $this->assertDatabaseHas('bukus', [
+        'kode_buku' => 'BK-WEB-001',
+        'judul' => 'Buku dari Form Web',
+        'kategori_id' => $kategori->id,
+        'stok' => 5,
+    ]);
+});
+
+test('petugas can edit a book through the web form', function () {
+    $buku = Buku::create([
+        'kode_buku' => 'BK-EDIT-001',
+        'judul' => 'Judul Sebelum Edit',
+        'penulis' => 'Penulis Lama',
+        'penerbit' => 'Penerbit Lama',
+        'tahun_terbit' => 2020,
+        'isbn' => 'ISBN-EDIT-001',
+        'stok' => 3,
+    ]);
+
+    $this->get(route('bukus.edit', $buku))
+        ->assertSuccessful()
+        ->assertSee('Edit Buku')
+        ->assertSee('value="BK-EDIT-001"', false)
+        ->assertSee('value="Judul Sebelum Edit"', false)
+        ->assertSee('value="3"', false)
+        ->assertSee('name="_method" value="PUT"', false);
+
+    $this->put(route('bukus.update', $buku), [
+        'kode_buku' => 'BK-EDIT-001',
+        'judul' => 'Judul Setelah Edit',
+        'penulis' => 'Penulis Baru',
+        'penerbit' => 'Penerbit Baru',
+        'tahun_terbit' => 2024,
+        'isbn' => 'ISBN-EDIT-001',
+        'stok' => 5,
+    ])->assertRedirect('/bukus');
+
+    $this->assertDatabaseHas('bukus', [
+        'kode_buku' => 'BK-EDIT-001',
+        'judul' => 'Judul Setelah Edit',
+        'penulis' => 'Penulis Baru',
+        'stok' => 5,
+    ]);
 });
 
 test('books can be searched by title author or code', function () {
@@ -30,6 +103,126 @@ test('books can be searched by title author or code', function () {
         ->assertSuccessful()
         ->assertSee('Pemrograman Laravel')
         ->assertDontSee('Matematika Dasar');
+});
+
+test('students can borrow books through the catalog using their linked member account', function () {
+    $student = User::factory()->create([
+        'role' => 'siswa',
+        'email' => 'student-borrower@example.com',
+    ]);
+    $anggota = Anggota::create([
+        'nomor_anggota' => 'AG-BORROWER',
+        'nis_nip' => 'ST-BORROWER',
+        'nama' => 'Siswa Peminjam',
+        'jenis_anggota' => 'siswa',
+        'email' => 'student-borrower@example.com',
+        'aktif' => true,
+    ]);
+    $buku = Buku::create([
+        'kode_buku' => 'BK-BORROWER',
+        'judul' => 'Buku untuk Dipinjam',
+        'penulis' => 'Penulis',
+        'penerbit' => 'Sekolah',
+        'stok' => 2,
+    ]);
+
+    $this->actingAs($student)
+        ->get(route('katalog-buku.index'))
+        ->assertSuccessful()
+        ->assertSee('Pinjam Buku');
+
+    $this->get(route('katalog-buku.show', $buku))
+        ->assertSuccessful()
+        ->assertSee('Pinjam Buku');
+
+    $this->post(route('katalog-buku.pinjam', $buku))
+        ->assertRedirect(route('peminjamans.mine'));
+
+    $peminjaman = Peminjaman::firstOrFail();
+
+    expect($peminjaman->nis_nip)->toBe($anggota->nis_nip)
+        ->and($peminjaman->buku_id)->toBe($buku->id)
+        ->and($peminjaman->tanggal_pinjam->toDateString())->toBe(today()->toDateString())
+        ->and($peminjaman->batas_pengembalian->toDateString())->toBe(today()->addDays(14)->toDateString())
+        ->and($peminjaman->status)->toBe('dipinjam');
+
+    expect($buku->fresh()->stok)->toBe(1);
+
+    $this->get(route('peminjamans.mine'))
+        ->assertSuccessful()
+        ->assertSee('Buku berhasil dipinjam')
+        ->assertSee('Buku untuk Dipinjam');
+});
+
+test('students cannot borrow books when their login is not linked to an active member', function () {
+    $student = User::factory()->create([
+        'role' => 'siswa',
+        'email' => 'unlinked-student@example.com',
+    ]);
+    Anggota::create([
+        'nomor_anggota' => 'AG-OTHER-STUDENT',
+        'nis_nip' => 'ST-OTHER',
+        'nama' => 'Anggota Lain',
+        'jenis_anggota' => 'siswa',
+        'email' => 'other-student@example.com',
+        'aktif' => true,
+    ]);
+    $buku = Buku::create([
+        'kode_buku' => 'BK-UNLINKED',
+        'judul' => 'Buku Terlindungi',
+        'penulis' => 'Penulis',
+        'penerbit' => 'Sekolah',
+        'stok' => 1,
+    ]);
+
+    $this->actingAs($student)
+        ->post(route('katalog-buku.pinjam', $buku))
+        ->assertForbidden();
+
+    expect(Peminjaman::count())->toBe(0)
+        ->and($buku->fresh()->stok)->toBe(1);
+});
+
+test('students cannot exceed the active loan limit', function () {
+    $student = User::factory()->create([
+        'role' => 'siswa',
+        'email' => 'loan-limit-student@example.com',
+    ]);
+    $anggota = Anggota::create([
+        'nomor_anggota' => 'AG-LOAN-LIMIT',
+        'nis_nip' => 'ST-LOAN-LIMIT',
+        'nama' => 'Siswa Batas Pinjaman',
+        'jenis_anggota' => 'siswa',
+        'email' => 'loan-limit-student@example.com',
+        'aktif' => true,
+    ]);
+    $buku = Buku::create([
+        'kode_buku' => 'BK-LOAN-LIMIT',
+        'judul' => 'Buku di Batas Maksimal',
+        'penulis' => 'Penulis',
+        'penerbit' => 'Sekolah',
+        'stok' => 6,
+    ]);
+
+    foreach (range(1, 5) as $index) {
+        Peminjaman::create([
+            'nis_nip' => $anggota->nis_nip,
+            'buku_id' => $buku->id,
+            'tanggal_pinjam' => today()->toDateString(),
+            'batas_pengembalian' => today()->addDays(14)->toDateString(),
+            'status' => 'dipinjam',
+        ]);
+    }
+
+    $this->actingAs($student)
+        ->post(route('katalog-buku.pinjam', $buku))
+        ->assertRedirect(route('katalog-buku.show', $buku));
+
+    $this->get(route('katalog-buku.show', $buku))
+        ->assertSee('Batas pinjaman aktif Anda adalah 5 buku.');
+
+    expect(Peminjaman::count())->toBe(5)
+        ->and($buku->fresh()->stok)->toBe(6);
 });
 
 test('book lists can be filtered by category', function () {

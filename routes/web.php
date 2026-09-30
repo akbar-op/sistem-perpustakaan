@@ -61,6 +61,8 @@ Route::middleware('auth')->group(function () {
             ->name('katalog-buku.index');
         Route::get('katalog-buku/{buku}', [BukuController::class, 'show'])
             ->name('katalog-buku.show');
+        Route::post('katalog-buku/{buku}/pinjam', [PeminjamanController::class, 'pinjamUntukSiswa'])
+            ->name('katalog-buku.pinjam');
         Route::get('peminjaman-saya', [PeminjamanController::class, 'mine'])
             ->name('peminjamans.mine');
     });

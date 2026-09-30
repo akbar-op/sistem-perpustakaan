@@ -16,7 +16,7 @@
 
     <div class="flex min-h-screen flex-col lg:flex-row">
         @include('layout.sidebar')
-        
+
         @yield('content')
     </div>
 </body>

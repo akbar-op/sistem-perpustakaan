@@ -3,9 +3,9 @@
 use App\Models\Buku;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\DemoStudentAccountSeeder;
 use Database\Seeders\InitialAdminSeeder;
 use Database\Seeders\InitialStaffAccountsSeeder;
-use App\Console\Commands\ResetAdminPassword;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +27,28 @@ test('admin and petugas can log in', function () {
     ])->assertRedirect('/dashboard');
 
     $this->assertAuthenticatedAs($user);
+});
+
+test('demo student account can log in and access linked borrowing history', function () {
+    $this->seed(DemoStudentAccountSeeder::class);
+    $this->seed(DemoStudentAccountSeeder::class);
+
+    $student = User::where('email', 'siswa@perpustakaan.test')->firstOrFail();
+
+    expect(User::where('email', 'siswa@perpustakaan.test')->count())->toBe(1);
+
+    $this->assertDatabaseHas('anggotas', [
+        'nis_nip' => 'S-DEMO-001',
+        'email' => 'siswa@perpustakaan.test',
+    ]);
+
+    $this->post('/login', [
+        'email' => 'siswa@perpustakaan.test',
+        'password' => 'password',
+    ])->assertRedirect(route('katalog-buku.index'));
+
+    $this->assertAuthenticatedAs($student);
+    $this->get('/peminjaman-saya')->assertSuccessful();
 });
 
 test('initial admin seeder hashes the configured password', function () {

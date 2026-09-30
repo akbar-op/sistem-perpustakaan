@@ -54,6 +54,67 @@ class PeminjamanController extends Controller
         return view('peminjamans.mine', compact('peminjamans', 'status'));
     }
 
+    public function pinjamUntukSiswa(Request $request, Buku $buku)
+    {
+        $user = $request->user();
+        abort_unless($user->email, 403, 'Akun belum terhubung dengan data anggota perpustakaan.');
+
+        $settings = DB::table('library_settings')->find(1);
+        $maxBooks = (int) ($settings->max_books ?? 5);
+        $loanDurationDays = (int) ($settings->loan_duration_days ?? 14);
+        $tanggalPinjam = today()->toDateString();
+        $batasPengembalian = today()->addDays($loanDurationDays)->toDateString();
+
+        $error = DB::transaction(function () use ($user, $buku, $maxBooks, $tanggalPinjam, $batasPengembalian) {
+            $anggotas = Anggota::query()
+                ->where('email', $user->email)
+                ->lockForUpdate()
+                ->get(['id', 'nis_nip', 'jenis_anggota', 'aktif']);
+
+            abort_unless($anggotas->count() === 1, 403, 'Akun harus terhubung dengan tepat satu data anggota.');
+
+            $anggota = $anggotas->first();
+            abort_unless(
+                $anggota->nis_nip && strcasecmp($anggota->jenis_anggota ?? '', 'siswa') === 0 && $anggota->aktif,
+                403,
+                'Data anggota siswa belum aktif atau belum lengkap.'
+            );
+
+            $jumlahPinjamanAktif = Peminjaman::query()
+                ->where('nis_nip', $anggota->nis_nip)
+                ->where('status', 'dipinjam')
+                ->count();
+
+            if ($jumlahPinjamanAktif >= $maxBooks) {
+                return "Batas pinjaman aktif Anda adalah {$maxBooks} buku.";
+            }
+
+            $bukuTerkunci = Buku::query()->lockForUpdate()->findOrFail($buku->getKey());
+
+            if ($bukuTerkunci->stok < 1) {
+                return 'Stok buku ini sedang habis.';
+            }
+
+            Peminjaman::create([
+                'nis_nip' => $anggota->nis_nip,
+                'buku_id' => $bukuTerkunci->id,
+                'tanggal_pinjam' => $tanggalPinjam,
+                'batas_pengembalian' => $batasPengembalian,
+                'status' => 'dipinjam',
+            ]);
+            $bukuTerkunci->decrement('stok');
+
+            return null;
+        });
+
+        if ($error !== null) {
+            return redirect()->route('katalog-buku.show', $buku)->with('error', $error);
+        }
+
+        return redirect()->route('peminjamans.mine')
+            ->with('success', 'Buku berhasil dipinjam. Batas pengembalian: '.now()->parse($batasPengembalian)->format('d-m-Y').'.');
+    }
+
     public function create()
     {
         $anggotas = Anggota::where('aktif', true)->orderBy('nama')->get();

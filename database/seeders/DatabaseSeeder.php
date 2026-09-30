@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             throw new LogicException('DatabaseSeeder contains demo accounts and data; it cannot run in production.');
         }
 
+        $this->call(InitialBookCategoriesSeeder::class);
+        $this->call(DemoStudentAccountSeeder::class);
+
         User::factory()->create([
             'name' => 'Petugas Perpustakaan',
             'email' => 'petugas@perpustakaan.test',
@@ -35,13 +38,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'kepala.sekolah@perpustakaan.test',
             'password' => 'password',
             'role' => 'kepala_sekolah',
-        ]);
-
-        User::factory()->create([
-            'name' => 'Siswa Perpustakaan',
-            'email' => 'siswa@perpustakaan.test',
-            'password' => 'password',
-            'role' => 'siswa',
         ]);
 
         $books = [

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +8,7 @@
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="min-h-full bg-[#f4f7fc] text-[#14213d]">
     <main class="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)]">
         <section class="relative flex min-h-[420px] flex-col overflow-hidden bg-[#4161e8] px-7 py-8 text-white sm:px-12 lg:min-h-screen lg:px-16 lg:py-12">
@@ -21,8 +23,14 @@
                 <h1 class="max-w-md text-4xl font-bold leading-tight tracking-tight sm:text-5xl">Kelola perpustakaan dengan percaya diri.</h1>
                 <p class="mt-6 max-w-md text-base leading-7 text-blue-100">Pantau koleksi buku, anggota, peminjaman, dan pengembalian dari satu ruang kerja yang sederhana.</p>
                 <div class="mt-10 grid max-w-md grid-cols-2 gap-3">
-                    <div class="rounded-2xl bg-white/10 p-4"><p class="text-2xl font-bold">24/7</p><p class="mt-1 text-xs text-blue-100">Akses data</p></div>
-                    <div class="rounded-2xl bg-white/10 p-4"><p class="text-2xl font-bold">Aman</p><p class="mt-1 text-xs text-blue-100">Untuk sekolah</p></div>
+                    <div class="rounded-2xl bg-white/10 p-4">
+                        <p class="text-2xl font-bold">24/7</p>
+                        <p class="mt-1 text-xs text-blue-100">Akses data</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/10 p-4">
+                        <p class="text-2xl font-bold">Aman</p>
+                        <p class="mt-1 text-xs text-blue-100">Untuk sekolah</p>
+                    </div>
                 </div>
             </div>
             <p class="relative z-10 text-xs text-blue-200">LibraMS &middot; Sistem manajemen perpustakaan</p>
@@ -38,7 +46,7 @@
                 <p class="mt-3 text-sm leading-6 text-[#71809d]">Gunakan email dan password yang terdaftar untuk melanjutkan.</p>
 
                 @if ($errors->any())
-                    <div class="mt-6 rounded-xl border border-[#f4c5bc] bg-[#fff5f2] px-4 py-3 text-sm text-[#b6503f]" role="alert">{{ $errors->first() }}</div>
+                <div class="mt-6 rounded-xl border border-[#f4c5bc] bg-[#fff5f2] px-4 py-3 text-sm text-[#b6503f]" role="alert">{{ $errors->first() }}</div>
                 @endif
 
                 <form class="mt-8 space-y-5" action="{{ route('login.store') }}" method="POST">
@@ -59,4 +67,5 @@
         </section>
     </main>
 </body>
+
 </html>
